@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: planify-postgres
+    environment:
+      POSTGRES_USER: planify
+      POSTGRES_PASSWORD: planify
+      POSTGRES_DB: planify
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - planify-net
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: planify-zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - planify-net
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: planify-kafka
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INSIDE://:9093,OUTSIDE://:9092
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+    ports:
+      - "9092:9092"
+    networks:
+      - planify-net
+
+volumes:
+  postgres_data:
+
+networks:
+  planify-net:

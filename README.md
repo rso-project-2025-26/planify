@@ -85,7 +85,7 @@ Expected:
 Go to any microservice folder (example: `service-template`):
 
 ```bash
-cd service-template
+cd services/service-template
 ```
 
 Run it using Maven:
@@ -120,9 +120,9 @@ Run the container:
 ```bash
 docker run -p 8080:8080 planify/service-template
 ```
-# 🧰 How to Start Development of a New Microservice
+## 🧰 How to Start Development of a New Microservice
 
-## 1. Create a new branch
+### 1. Create a new branch
 
 Every microservice MUST be developed in its own Git branch:
 
@@ -132,7 +132,7 @@ git checkout -b feature/user-service
 
 ---
 
-## 2. Copy the template
+### 2. Copy the template
 
 ```bash
 cp -r service-template user-service
@@ -140,22 +140,22 @@ cp -r service-template user-service
 
 ---
 
-## 3. Update naming
+### 3. Update naming
 
-### Update folder structure and package names:
+#### Update folder structure and package names:
 
 ```
 com.planify.service_template → com.planify.user_service
 ```
 
-### Update `pom.xml`:
+#### Update `pom.xml`:
 
 ```xml
 <artifactId>user-service</artifactId>
 <name>User Service</name>
 ```
 
-### Update application.yml:
+#### Update application.yml:
 
 ```yaml
 spring:
@@ -168,14 +168,14 @@ server:
 
 ---
 
-## 4. Start local development
+### 4. Start local development
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
 ---
-# 🔀 Git Workflow for Microservice Development
+## 🔀 Git Workflow for Microservice Development
 
 To keep the repo clean and consistent:
 
@@ -185,7 +185,7 @@ Example:
 
 ```
 feature/user-service
-feature/event-service
+feature/event-manager-service
 feature/booking-db-schema
 ```
 

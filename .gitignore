@@ -1,8 +1,14 @@
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+!.mvn/wrapper/maven-wrapper.jar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
 
 ### STS ###
 .apt_generated
@@ -31,3 +37,31 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
+logs/
+
+### Docker volumes ###
+postgres_data/
+
+### Postman ###
+*.postman_collection.json
+*.postman_environment.json
+
+### Temporary files ###
+*.tmp
+*.bak
+*.swp
+*~
+
+### Application properties with secrets ###
+*-local.yaml
+*-secret.yaml
+
+### Custom scripts ###
+*.bat

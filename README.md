@@ -120,6 +120,83 @@ Run the container:
 ```bash
 docker run -p 8080:8080 planify/service-template
 ```
+
+## How to setup Azure environment
+
+### 🔑 1. Log in to Azure
+
+Open your terminal and sign in:
+
+```bash
+az login
+```
+
+### 🔍 2. Verify Login
+
+Check that you are logged in:
+
+```bash
+az account show
+```
+
+If it shows your subscription details, you are logged in.
+
+### 📌 3. Select the Correct Subscription
+
+```bash
+az account list --output table
+```
+
+If you have multiple Azure subscriptions:
+
+```bash
+az account set --subscription "<SUBSCRIPTION_ID>"
+```
+
+### 🏗 4. Create the Resource Group
+
+```bash
+az group create \
+  --name planify-rg \
+  --location germanywestcentral
+```
+
+### 🧩 5. Create the AKS Kubernetes Cluster
+
+```bash
+az aks create \
+  --resource-group planify-rg \
+  --name planify-cluster \
+  --node-count 1 \
+  --node-vm-size Standard_B2ps_v2 \
+  --enable-managed-identity \
+  --generate-ssh-keys \
+  --location germanywestcentral \
+  --network-plugin azure \
+  --node-osdisk-size 30 \
+  --max-pods 30 \
+  --enable-cluster-autoscaler \
+  --min-count 1 \
+  --max-count 2 \
+  --tier free
+```
+
+### 🔗 6. Connect kubectl to the Cluster
+
+Once the cluster is created, download credentials:
+
+```bash
+az aks get-credentials \
+  --resource-group planify-rg \
+  --name planify-cluster
+```
+
+Verify the connection:
+
+```bash
+kubectl get nodes
+```
+
 ## 🧰 How to Start Development of a New Microservice
 
 ### 1. Create a new branch

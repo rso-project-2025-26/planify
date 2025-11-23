@@ -197,6 +197,25 @@ Verify the connection:
 kubectl get nodes
 ```
 
+### 7. After the Cluster Is Set Up
+
+Delete the cluster:
+
+```bash
+az aks delete \
+  --resource-group planify-rg \
+  --name planify-cluster \
+  --yes
+```
+
+Start and stop the cluster:
+
+```bash
+az aks start --resource-group planify-rg --name planify-cluster
+az aks stop --resource-group planify-rg --name planify-cluster
+```
+
+
 ## Deployment Process
 
 ### Automatic (CI/CD)

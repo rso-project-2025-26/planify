@@ -197,6 +197,30 @@ Verify the connection:
 kubectl get nodes
 ```
 
+## Deployment Process
+
+### Automatic (CI/CD)
+1. Push code to `dev` or `main` branch
+2. GitHub Actions automatically:
+   - Builds the code
+   - Runs tests
+   - Creates Docker image
+   - Pushes to GitHub Container Registry
+
+### Manual Deployment Step
+After GitHub Actions completes, deploy to Kubernetes:
+
+```bash
+# Deploy to development
+kubectl rollout restart deployment/event-manager-service -n planify-dev
+
+# Verify deployment
+kubectl get pods -n planify-dev
+
+# Check rollout status
+kubectl rollout status deployment/event-manager-service -n planify-dev
+```
+
 ## 🧰 How to Start Development of a New Microservice
 
 ### 1. Create a new branch

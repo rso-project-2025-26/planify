@@ -45,11 +45,12 @@ cd planify
 ```
 
 ### 2. Install System Tools
+
 -   Docker Desktop
 -   Java 21
 -   Maven 3.9+
 -   Node.js + npm
- 
+
 ### 3. Start Infrastructure (PostgreSQL, Kafka, Zookeeper)
 
 From the project root:
@@ -58,13 +59,14 @@ From the project root:
 cd infrastructure
 docker compose up -d
 ```
+
 Services start on:
 
-| Service | Port |
-|---------|------|
+| Service    | Port |
+| ---------- | ---- |
 | PostgreSQL | 5432 |
-| Kafka | 9092 |
-| Zookeeper | 2181 |
+| Kafka      | 9092 |
+| Zookeeper  | 2181 |
 
 Check PostgreSQL:
 
@@ -97,10 +99,13 @@ Run it using Maven:
 Or run the packaged JAR:
 
 First we need to build it:
+
 ```bash
 ./mvnw clean install
 ```
+
 Then we can run it:
+
 ```bash
 java -jar target/service-template-0.0.1-SNAPSHOT.jar
 ```
@@ -215,18 +220,19 @@ az aks start --resource-group planify-rg --name planify-cluster
 az aks stop --resource-group planify-rg --name planify-cluster
 ```
 
-
 ## Deployment Process
 
 ### Automatic (CI/CD)
+
 1. Push code to `dev` or `main` branch
 2. GitHub Actions automatically:
-   - Builds the code
-   - Runs tests
-   - Creates Docker image
-   - Pushes to GitHub Container Registry
+    - Builds the code
+    - Runs tests
+    - Creates Docker image
+    - Pushes to GitHub Container Registry
 
 ### Manual Deployment Step
+
 After GitHub Actions completes, deploy to Kubernetes:
 
 ```bash
@@ -279,11 +285,11 @@ com.planify.service_template → com.planify.user_service
 
 ```yaml
 spring:
-  application:
-    name: user-service
+    application:
+        name: user-service
 
 server:
-  port: 8081
+    port: 8081
 ```
 
 ---
@@ -295,6 +301,7 @@ server:
 ```
 
 ---
+
 ## 🔀 Git Workflow for Microservice Development
 
 To keep the repo clean and consistent:
@@ -319,6 +326,25 @@ git push -u origin feature/user-service
 
 2. Open a Pull Request **feature → dev**
 
-3. Another team member must review & approve the PR 
+3. Another team member must review & approve the PR
 
 4. After approval → merge into `dev`
+
+---
+
+## 🔖 Versioning (short)
+
+We use Semantic Versioning (SemVer): MAJOR.MINOR.PATCH (for example: 1.2.3).
+
+-   Development (`dev` branch) uses `-SNAPSHOT` versions (e.g. `1.3.0-SNAPSHOT`).
+-   Released code on `main` should have the release version without `-SNAPSHOT` (e.g. `1.3.0`) and a Git tag `v1.3.0`.
+
+Typical release steps:
+
+1. Create a release branch from `dev` (e.g. `release/v1.3.0`).
+2. Remove the `-SNAPSHOT` suffix in all `pom.xml` files and commit.
+3. Tag the release (`git tag -a v1.3.0 -m "Release v1.3.0"`) and push.
+4. Merge the release branch into `main` (CI will build/tag images from the release).
+5. Bump `dev` to the next snapshot (e.g. `1.4.0-SNAPSHOT`).
+
+You can automate releases with Maven's release plugin (`mvn release:prepare release:perform`) or use `mvn versions:set` for simple bumps. See the project docs if you want fully automated GitHub Actions releases.

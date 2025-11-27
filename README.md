@@ -279,3 +279,21 @@ git push -u origin feature/user-service
 3. Another team member must review & approve the PR 
 
 4. After approval → merge into `dev`
+
+---
+
+## 🔖 Versioning (short)
+
+We use Semantic Versioning (SemVer): MAJOR.MINOR.PATCH (for example: 1.2.3).
+
+- Development (`dev` branch) uses `-SNAPSHOT` versions (e.g. `1.3.0-SNAPSHOT`).
+- Released code on `main` should have the release version without `-SNAPSHOT` (e.g. `1.3.0`) and a Git tag `v1.3.0`.
+
+Typical release steps:
+1. Create a release branch from `dev` (e.g. `release/v1.3.0`).
+2. Remove the `-SNAPSHOT` suffix in all `pom.xml` files and commit.
+3. Tag the release (`git tag -a v1.3.0 -m "Release v1.3.0"`) and push.
+4. Merge the release branch into `main` (CI will build/tag images from the release).
+5. Bump `dev` to the next snapshot (e.g. `1.4.0-SNAPSHOT`).
+
+You can automate releases with Maven's release plugin (`mvn release:prepare release:perform`) or use `mvn versions:set` for simple bumps. See the project docs if you want fully automated GitHub Actions releases.

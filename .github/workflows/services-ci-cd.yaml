@@ -2,7 +2,7 @@ name: Planify Microservices - CI/CD
 
 on:
   push:
-    branches: [main, dev, feature/ci-cd]
+    branches: [main, dev]
     paths:
       - 'services/**'
       - '.github/workflows/services-ci-cd.yaml'
@@ -112,7 +112,7 @@ jobs:
     if: |
       needs.detect-changes.outputs.services != '[]' &&
       github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/feature/ci-cd')
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     
     strategy:
       matrix:
@@ -172,7 +172,7 @@ jobs:
     if: |
       needs.detect-changes.outputs.services != '[]' &&
       github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/ci-cd')
+      github.ref == 'refs/heads/main'
     
     strategy:
       matrix:

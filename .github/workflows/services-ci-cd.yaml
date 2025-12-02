@@ -13,6 +13,9 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  AZURE_RESOURCE_GROUP: planify-rg
+  AZURE_CLUSTER_NAME: planify-cluster
+  USE_KUBECONFIG: 'true'
 
 jobs:
   # Job 1: Detect Changed Services
@@ -44,7 +47,7 @@ jobs:
             user-service:
               - 'services/user-service/**'
 
-  # Job 2: Build and Test (runs for each changed service)
+  # Job 2: Build and Test
   build-and-test:
     name: Build & Test
     needs: detect-changes
@@ -54,7 +57,7 @@ jobs:
     strategy:
       matrix:
         service: ${{ fromJSON(needs.detect-changes.outputs.services) }}
-      fail-fast: false  # Continue even if one service fails
+      fail-fast: false
     
     services:
       postgres:
@@ -101,7 +104,7 @@ jobs:
           path: services/${{ matrix.service }}/target/*.jar
           retention-days: 5
 
-  # Job 3: Build Docker Images (only for dev/main)
+  # Job 3: Build Docker Images
   build-docker:
     name: Build Docker Image
     needs: [detect-changes, build-and-test]
@@ -161,12 +164,15 @@ jobs:
           echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-  # Job 4: Deploy to Kubernetes (DISABLED for now)
+  # Job 4: Deploy to Kubernetes
   deploy-to-k8s:
     name: Deploy to Kubernetes
     needs: [detect-changes, build-docker]
     runs-on: ubuntu-latest
-    if: false  # Enable when AKS cluster is ready
+    if: |
+      needs.detect-changes.outputs.services != '[]' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
     
     strategy:
       matrix:
@@ -177,9 +183,84 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deployment Placeholder for ${{ matrix.service }}
+      - name: Setup kubectl
         run: |
-          echo "=== Kubernetes deployment not yet configured ==="
-          echo "Service: ${{ matrix.service }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/planify-${{ matrix.service }}:${{ github.ref_name }}"
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Verify cluster connection
+        run: |
+          echo "Verifying cluster connection..."
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Set deployment namespace
+        id: namespace
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "namespace=planify-main" >> $GITHUB_OUTPUT
+          else
+            echo "namespace=planify-dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy ${{ matrix.service }}
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          SERVICE=${{ matrix.service }}
+          IMAGE=${{ env.REGISTRY }}/${{ github.repository_owner }}/planify-${SERVICE}:main
+          
+          echo "Deploying ${SERVICE} to ${NAMESPACE}"
+          echo "Image: ${IMAGE}"
+          
+          if kubectl get deployment ${SERVICE} -n ${NAMESPACE} >/dev/null 2>&1; then
+            echo "♻️  Updating existing deployment..."
+            kubectl set image deployment/${SERVICE} ${SERVICE}=${IMAGE} -n ${NAMESPACE}
+          else
+            echo "Creating new deployment..."
+            kubectl apply -f k8s/namespaces.yaml || true
+            kubectl apply -f k8s/${SERVICE}/deployment.yaml -n ${NAMESPACE} || echo "No deployment manifest found"
+            kubectl apply -f k8s/${SERVICE}/service.yaml -n ${NAMESPACE} || echo "No service manifest found"
+          fi
+
+      - name: Wait for rollout
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          SERVICE=${{ matrix.service }}
+          echo "Waiting for rollout to complete..."
+          kubectl rollout status deployment/${SERVICE} -n ${NAMESPACE} --timeout=5m
+
+      - name: Verify deployment
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          SERVICE=${{ matrix.service }}
+          
+          echo "Deployment verification:"
+          kubectl get deployment ${SERVICE} -n ${NAMESPACE}
+          echo ""
+          kubectl get pods -l app=${SERVICE} -n ${NAMESPACE}
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          NAMESPACE=${{ steps.namespace.outputs.namespace }}
+          SERVICE=${{ matrix.service }}
+          
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "### Deployment Successful: ${{ matrix.service }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **Namespace:** \`${NAMESPACE}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- **Image:** \`${{ env.REGISTRY }}/${{ github.repository_owner }}/planify-${SERVICE}:main\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Pods:**" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            kubectl get pods -l app=${SERVICE} -n ${NAMESPACE} >> $GITHUB_STEP_SUMMARY 2>&1 || echo "No pods found"
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Deployment Failed: ${{ matrix.service }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployment details:**" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            kubectl describe deployment ${SERVICE} -n ${NAMESPACE} >> $GITHUB_STEP_SUMMARY 2>&1 || echo "Could not describe deployment"
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi

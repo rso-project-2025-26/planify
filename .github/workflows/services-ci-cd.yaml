@@ -214,7 +214,7 @@ jobs:
           echo "Image: ${IMAGE}"
           
           if kubectl get deployment ${SERVICE} -n ${NAMESPACE} >/dev/null 2>&1; then
-            echo "♻️  Updating existing deployment..."
+            echo "Updating existing deployment..."
             kubectl set image deployment/${SERVICE} ${SERVICE}=${IMAGE} -n ${NAMESPACE}
           else
             echo "Creating new deployment..."

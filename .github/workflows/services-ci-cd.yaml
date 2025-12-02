@@ -5,7 +5,7 @@ on:
     branches: [main, dev, feature/ci-cd]
     paths:
       - 'services/**'
-      - '.github/workflows/services-ci-cd.yml'
+      - '.github/workflows/services-ci-cd.yaml'
   pull_request:
     branches: [main, dev]
     paths:

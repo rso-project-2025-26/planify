@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: event-manager-service
-  namespace: planify-dev
   labels:
     app: event-manager-service
 spec:
@@ -19,7 +18,7 @@ spec:
       - name: ghcr-secret
       containers:
       - name: event-manager-service
-        image: ghcr.io/rso-project-2025-26/planify-event-manager-service:dev
+        image: ghcr.io/rso-project-2025-26/planify-event-manager-service:main
         imagePullPolicy: Always
         ports:
         - containerPort: 8081

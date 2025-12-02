@@ -218,9 +218,10 @@ jobs:
             kubectl set image deployment/${SERVICE} ${SERVICE}=${IMAGE} -n ${NAMESPACE}
           else
             echo "Creating new deployment..."
-            kubectl apply -f k8s/namespaces.yaml || true
-            kubectl apply -f k8s/${SERVICE}/deployment.yaml -n ${NAMESPACE} || echo "No deployment manifest found"
-            kubectl apply -f k8s/${SERVICE}/service.yaml -n ${NAMESPACE} || echo "No service manifest found"
+            kubectl apply -f kubernetes/namespaces/namespaces.yaml || true
+            kubectl apply -f kubernetes/${SERVICE}/deployment.yaml -n ${NAMESPACE} || echo "No deployment manifest found"
+            kubectl apply -f kubernetes/${SERVICE}/service.yaml -n ${NAMESPACE} || echo "No service manifest found"
+            kubectl apply -f kubernetes/${SERVICE}/configmap.yaml -n ${NAMESPACE} || echo "No configmap manifest found"
           fi
 
       - name: Wait for rollout

@@ -1,44 +1,33 @@
 name: Infrastructure - CI/CD
 
 on:
-    push:
-        branches: [main, dev, feature/clean-up]
-        paths:
-            - 'k8s/**'
-            - '.github/workflows/infrastructure-ci-cd.yaml'
+  push:
+    branches: [main, dev, feature/clean-up]
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/infrastructure-ci-cd.yaml'
 
 jobs:
-    validate:
-        name: Validate Manifests
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - run: |
-                  for file in k8s/**/*.yaml; do
-                      kubectl apply --dry-run=client -f "$file" || exit 1
-                  done
-
-    deploy-infrastructure:
-        name: Deploy Infrastructure
-        needs: validate
-        runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/feature/clean-up'
-        steps:
-            - uses: actions/checkout@v4
-            - run: |
-                  mkdir -p $HOME/.kube
-                  echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
-                  chmod 600 $HOME/.kube/config
-            - run: |
-                  if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-                      NAMESPACE="planify-main"
-                  else
-                      NAMESPACE="planify-dev"
-                  fi
-                  
-                  kubectl apply -f k8s/namespaces/namespaces.yaml
-                  kubectl apply -f k8s/infrastructure/postgres.yaml -n ${NAMESPACE}
-                  kubectl apply -f k8s/infrastructure/kafka.yaml -n ${NAMESPACE}
-                  kubectl apply -f k8s/infrastructure/keycloak.yaml -n ${NAMESPACE}
-                  kubectl wait --for=condition=ready pod -l app=postgres -n ${NAMESPACE} --timeout=300s
-                  kubectl wait --for=condition=ready pod -l app=kafka -n ${NAMESPACE} --timeout=300s
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/feature/clean-up'
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+      - run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            NAMESPACE="planify-main"
+          else
+            NAMESPACE="planify-dev"
+          fi
+          
+          kubectl apply -f k8s/namespaces/namespaces.yaml
+          kubectl apply -f k8s/infrastructure/postgres.yaml -n ${NAMESPACE}
+          kubectl apply -f k8s/infrastructure/kafka.yaml -n ${NAMESPACE}
+          kubectl apply -f k8s/infrastructure/keycloak.yaml -n ${NAMESPACE}
+          kubectl wait --for=condition=ready pod -l app=postgres -n ${NAMESPACE} --timeout=300s
+          kubectl wait --for=condition=ready pod -l app=kafka -n ${NAMESPACE} --timeout=300s

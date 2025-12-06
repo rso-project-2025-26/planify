@@ -61,9 +61,6 @@ curl http://localhost:8081/actuator/health
 ./mvnw test
 ```
 
-### Test with Postman
-Import the Postman collection from `/postman` directory.
-
 ### Test with Swagger
 Open http://localhost:8081/swagger-ui.html
 
@@ -112,22 +109,3 @@ docker run -p 8081:8081 \
   -e SPRING_KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:9092 \
   planify/event-manager:latest
 ```
-
-## 📈 Metrics
-
-Prometheus metrics available at `/actuator/prometheus`:
-- JVM memory and CPU
-- HTTP request rates and latencies
-- Database connection pool stats
-- Kafka producer/consumer metrics
-
-## 🤝 Integration with Other Services
-
-### Dependencies
-- **user-service** - Validates organizer IDs
-- **guest-service** - Notified of new events
-
-### Dependents
-- **booking-service** - Uses event data for reservations
-- **notification-service** - Sends invites for events
-- **analytics-service** - Tracks event metrics

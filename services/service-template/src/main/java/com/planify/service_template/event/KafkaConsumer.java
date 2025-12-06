@@ -1,4 +1,4 @@
-package com.planify.template.event;
+package com.planify.service_template.event;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;

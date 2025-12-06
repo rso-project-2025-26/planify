@@ -65,9 +65,13 @@ services:
       KC_HOSTNAME_PORT: 9080
       KC_HTTP_ENABLED: "true"
       KC_PROXY: edge
-    command: start-dev
+    command: 
+      - start-dev
+      - --import-realm
     ports:
       - "9080:8080"
+    volumes:
+      - ./realm-config.json:/opt/keycloak/data/import/realm-config.json:ro
     depends_on:
       postgres:
         condition: service_healthy

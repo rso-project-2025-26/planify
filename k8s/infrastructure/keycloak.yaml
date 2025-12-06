@@ -1,72 +1,82 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: keycloak-secrets
+    name: keycloak-secrets
 type: Opaque
 stringData:
-  KEYCLOAK_ADMIN_USERNAME: "admin"
-  KEYCLOAK_ADMIN_PASSWORD: "admin"
+    KEYCLOAK_ADMIN_USERNAME: "admin"
+    KEYCLOAK_ADMIN_PASSWORD: "admin"
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: keycloak-config
+    name: keycloak-config
 data:
-  KC_DB: "postgres"
-  KC_DB_URL: "jdbc:postgresql://postgres-service:5432/planify?currentSchema=keycloak"
-  KC_DB_USERNAME: "planify"
-  KC_DB_SCHEMA: "keycloak"
-  KC_HOSTNAME_STRICT: "false"
-  KC_HTTP_ENABLED: "true"
+    KC_DB: "postgres"
+    KC_DB_URL: "jdbc:postgresql://postgres-service:5432/planify?currentSchema=keycloak"
+    KC_DB_USERNAME: "planify"
+    KC_DB_SCHEMA: "keycloak"
+    KC_HOSTNAME_STRICT: "false"
+    KC_HTTP_ENABLED: "true"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: keycloak-service
+    name: keycloak-service
 spec:
-  selector:
-    app: keycloak
-  ports:
-    - name: http
-      port: 8080
-      targetPort: 8080
+    selector:
+        app: keycloak
+    ports:
+        - name: http
+          port: 8080
+          targetPort: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: keycloak
+    name: keycloak
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: keycloak
-  template:
-    metadata:
-      labels:
-        app: keycloak
-    spec:
-      containers:
-        - name: keycloak
-          image: quay.io/keycloak/keycloak:24.0.1
-          args: ["start-dev"]
-          ports:
-            - containerPort: 8080
-          env:
-            - name: KEYCLOAK_ADMIN
-              valueFrom:
-                secretKeyRef:
-                  name: keycloak-secrets
-                  key: KEYCLOAK_ADMIN_USERNAME
-            - name: KEYCLOAK_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: keycloak-secrets
-                  key: KEYCLOAK_ADMIN_PASSWORD
-            - name: KC_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_PASSWORD
-          envFrom:
-            - configMapRef:
-                name: keycloak-config
+    replicas: 1
+    selector:
+        matchLabels:
+            app: keycloak
+    template:
+        metadata:
+            labels:
+                app: keycloak
+        spec:
+            containers:
+                - name: keycloak
+                  image: quay.io/keycloak/keycloak:24.0.1
+                  args:
+                      - "start-dev"
+                      - "--import-realm"
+                  ports:
+                      - containerPort: 8080
+                  env:
+                      - name: KEYCLOAK_ADMIN
+                        valueFrom:
+                            secretKeyRef:
+                                name: keycloak-secrets
+                                key: KEYCLOAK_ADMIN_USERNAME
+                      - name: KEYCLOAK_ADMIN_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: keycloak-secrets
+                                key: KEYCLOAK_ADMIN_PASSWORD
+                      - name: KC_DB_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: postgres-secret
+                                key: POSTGRES_PASSWORD
+                  envFrom:
+                      - configMapRef:
+                            name: keycloak-config
+                  volumeMounts:
+                      - name: realm-config
+                        mountPath: /opt/keycloak/data/import
+                        readOnly: true
+            volumes:
+                - name: realm-config
+                  configMap:
+                      name: keycloak-realm-config

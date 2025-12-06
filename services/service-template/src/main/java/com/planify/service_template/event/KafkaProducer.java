@@ -1,4 +1,4 @@
-package com.planify.template.event;
+package com.planify.service_template.event;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;

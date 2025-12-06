@@ -28,6 +28,12 @@ jobs:
           kubectl apply -f k8s/namespaces/namespaces.yaml
           kubectl apply -f k8s/infrastructure/postgres.yaml -n ${NAMESPACE}
           kubectl apply -f k8s/infrastructure/kafka.yaml -n ${NAMESPACE}
-          kubectl apply -f k8s/infrastructure/keycloak.yaml -n ${NAMESPACE}
+
           kubectl wait --for=condition=ready pod -l app=postgres -n ${NAMESPACE} --timeout=300s
+
+          kubectl delete job keycloak-init-schema -n ${NAMESPACE} --ignore-not-found=true
+          kubectl apply -f k8s/infrastructure/keycloak-init-job.yaml -n ${NAMESPACE}
+          kubectl wait --for=condition=complete job/keycloak-init-schema -n ${NAMESPACE} --timeout=60s
+          
+          kubectl apply -f k8s/infrastructure/keycloak.yaml -n ${NAMESPACE}
           kubectl wait --for=condition=ready pod -l app=kafka -n ${NAMESPACE} --timeout=300s

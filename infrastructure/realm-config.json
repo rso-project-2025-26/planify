@@ -47,6 +47,15 @@
   "roles": {
     "realm": [
       {
+        "id": "f4cd2502-aa90-4751-8095-54946861ee40",
+        "name": "organiser",
+        "description": "Organizator dogodkov v aplikaciji",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "603924fa-601d-44f0-8491-6dffe8783d2e",
+        "attributes": {}
+      },
+      {
         "id": "3b4ae1a7-ec60-4cce-a9e7-fbda5624f026",
         "name": "default-roles-planify",
         "description": "${role_default-roles}",
@@ -89,6 +98,24 @@
         "id": "463f8b7e-fca1-44ab-9f68-4843450ee77b",
         "name": "administrator",
         "description": "Administrator aplikacije planify",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "603924fa-601d-44f0-8491-6dffe8783d2e",
+        "attributes": {}
+      },
+      {
+        "id": "4b938ba2-a29a-4a7c-894e-d4de326f25d3",
+        "name": "guest",
+        "description": "Gost dogodkov v organizaciji",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "603924fa-601d-44f0-8491-6dffe8783d2e",
+        "attributes": {}
+      },
+      {
+        "id": "1ec0b3a1-7f83-4feb-b66b-09f60bd8cdca",
+        "name": "org_admin",
+        "description": "Admin organizacije",
         "composite": false,
         "clientRole": false,
         "containerId": "603924fa-601d-44f0-8491-6dffe8783d2e",
@@ -685,26 +712,36 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "http://localhost:8082/*"
+        "http://localhost:4200/*"
       ],
       "webOrigins": [
-        "http://localhost:8082/"
+        "http://localhost:4200"
       ],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
+      "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "publicClient": true,
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
-        "oidc.ciba.grant.enabled": "false",
+        "post.logout.redirect.uris": "http://localhost:4200/*",
         "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "use.refresh.tokens": "true",
+        "oidc.ciba.grant.enabled": "false",
+        "client.use.lightweight.access.token.enabled": "false",
         "backchannel.logout.session.required": "true",
-        "backchannel.logout.revoke.offline.tokens": "false"
+        "client_credentials.use_refresh_token": "false",
+        "acr.loa.map": "{}",
+        "require.pushed.authorization.requests": "false",
+        "tls.client.certificate.bound.access.tokens": "false",
+        "display.on.consent.screen": "false",
+        "pkce.code.challenge.method": "S256",
+        "token.response.type.bearer.lower-case": "false"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": true,

@@ -2,100 +2,95 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-    name: postgres-init-script
-    namespace: planify-dev
+  name: postgres-init-script
 data:
-    init-schemas.sql: |
-        -- Create Keycloak schema
-        CREATE SCHEMA IF NOT EXISTS keycloak AUTHORIZATION planify;
-        -- Grant permissions
-        GRANT ALL PRIVILEGES ON SCHEMA keycloak TO planify;
+  init-schemas.sql: |
+    -- Create Keycloak schema
+    CREATE SCHEMA IF NOT EXISTS keycloak;
+    GRANT ALL PRIVILEGES ON SCHEMA keycloak TO planify;
 ---
 # ConfigMap for PostgreSQL
 apiVersion: v1
 kind: ConfigMap
 metadata:
-    name: postgres-config
-    namespace: planify-dev
+  name: postgres-config
 data:
-    POSTGRES_DB: planify
-    POSTGRES_USER: planify
+  POSTGRES_DB: planify
+  POSTGRES_USER: planify
 ---
 # Secret for PostgreSQL password
 apiVersion: v1
 kind: Secret
 metadata:
-    name: postgres-secret
-    namespace: planify-dev
+  name: postgres-secret
 type: Opaque
 stringData:
-    POSTGRES_PASSWORD: planify123
+  POSTGRES_PASSWORD: planify123
 ---
 # PostgreSQL StatefulSet
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-    name: postgres
-    namespace: planify-dev
+  name: postgres
 spec:
-    serviceName: postgres-service
-    replicas: 1
-    selector:
-        matchLabels:
-            app: postgres
-    template:
-        metadata:
-            labels:
-                app: postgres
-        spec:
-            volumes:
-                - name: init-script
-                  configMap:
-                      name: postgres-init-script
-            containers:
-                - name: postgres
-                  image: postgres:16
-                  ports:
-                      - containerPort: 5432
-                        name: postgres
-                  envFrom:
-                      - configMapRef:
-                            name: postgres-config
-                      - secretRef:
-                            name: postgres-secret
-                  env:
-                      - name: PGDATA
-                        value: /var/lib/postgresql/data/pgdata
-                  volumeMounts:
-                      - name: postgres-storage
-                        mountPath: /var/lib/postgresql/data
-                      - name: init-script
-                        mountPath: /docker-entrypoint-initdb.d
-                  resources:
-                      requests:
-                          memory: "256Mi"
-                          cpu: "250m"
-                      limits:
-                          memory: "512Mi"
-                          cpu: "500m"
-    volumeClaimTemplates:
-        - metadata:
-              name: postgres-storage
-          spec:
-              accessModes: ["ReadWriteOnce"]
-              resources:
-                  requests:
-                      storage: 5Gi
+  serviceName: postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      volumes:
+        - name: init-script
+          configMap:
+            name: postgres-init-script
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+              name: postgres
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+            - secretRef:
+                name: postgres-secret
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
 ---
 # PostgreSQL Service
 apiVersion: v1
 kind: Service
 metadata:
-    name: postgres-service
+  name: postgres-service
 spec:
-    selector:
-        app: postgres
-    ports:
-        - port: 5432
-          targetPort: 5432
-    clusterIP: None
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+  clusterIP: None

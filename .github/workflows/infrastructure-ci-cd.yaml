@@ -2,16 +2,17 @@ name: Infrastructure - CI/CD
 
 on:
     push:
-        branches: [main, dev, feature/clean-up]
+        branches: [main, dev]
         paths:
             - "k8s/**"
             - ".github/workflows/infrastructure-ci-cd.yaml"
+            - "helm/infrastructure/**"
 
 jobs:
     deploy-infrastructure:
         name: Deploy Infrastructure
         runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/feature/clean-up'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev''
         steps:
             - uses: actions/checkout@v4
             - run: |
@@ -19,28 +20,16 @@ jobs:
                   echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
                   chmod 600 $HOME/.kube/config
             - run: |
-                  if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-                    NAMESPACE="planify-main"
-                  else
-                    NAMESPACE="planify-dev"
-                  fi
+                if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+                  NAMESPACE="planify-main"
+                else
+                  NAMESPACE="planify-dev"
+                fi
 
-                  kubectl apply -f k8s/namespaces/namespaces.yaml
-                  kubectl apply -f k8s/infrastructure/postgres.yaml -n ${NAMESPACE}
-                  kubectl apply -f k8s/infrastructure/kafka.yaml -n ${NAMESPACE}
+                kubectl apply -f k8s/namespaces/namespaces.yaml
 
-                  kubectl wait --for=condition=ready pod -l app=postgres -n ${NAMESPACE} --timeout=300s
-
-                  kubectl delete job keycloak-init-schema -n ${NAMESPACE} --ignore-not-found=true
-                  kubectl apply -f k8s/infrastructure/keycloak-init-job.yaml -n ${NAMESPACE}
-                  kubectl wait --for=condition=complete job/keycloak-init-schema -n ${NAMESPACE} --timeout=60s
-
-                  if [ -f "infrastructure/realm-config.json" ]; then
-                    kubectl create configmap keycloak-realm-config \
-                      --from-file=realm-config.json=infrastructure/realm-config.json \
-                      -n ${NAMESPACE} \
-                      --dry-run=client -o yaml | kubectl apply -f -
-                  fi
-
-                  kubectl apply -f k8s/infrastructure/keycloak.yaml -n ${NAMESPACE}
-                  kubectl wait --for=condition=ready pod -l app=kafka -n ${NAMESPACE} --timeout=300s
+                helm upgrade --install infrastructure ./helm/infrastructure \
+                  --namespace ${NAMESPACE} \
+                  --create-namespace \
+                  --wait \
+                  --timeout=5m

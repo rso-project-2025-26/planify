@@ -1,0 +1,53 @@
+postgres:
+  replicas: 1
+  image:
+    repository: postgres
+    tag: "16"
+    pullPolicy: IfNotPresent
+  database: planify
+  username: planify
+  password: planify123
+  port: 5432
+  storage: 5Gi
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+kafka:
+  replicas: 1
+  image:
+    repository: confluentinc/cp-kafka
+    tag: "7.5.0"
+    pullPolicy: IfNotPresent
+  port: 9092
+  brokerId: "1"
+  offsetsTopicReplicationFactor: "1"
+
+zookeeper:
+  replicas: 1
+  image:
+    repository: confluentinc/cp-zookeeper
+    tag: "7.5.0"
+    pullPolicy: IfNotPresent
+  clientPort: "2181"
+  tickTime: "2000"
+
+keycloak:
+  replicas: 1
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: "24.0.1"
+    pullPolicy: IfNotPresent
+  adminUsername: admin
+  adminPassword: admin
+  port: 8080
+  nodePort: 30080
+  database:
+    type: postgres
+    schema: keycloak
+  hostnameStrict: "false"
+  httpEnabled: "true"

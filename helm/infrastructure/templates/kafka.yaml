@@ -16,7 +16,7 @@ kind: Deployment
 metadata:
   name: zookeeper
 spec:
-  replicas: 1
+  replicas: {{ .Values.zookeeper.replicas }}
   selector:
     matchLabels:
       app: zookeeper
@@ -27,14 +27,15 @@ spec:
     spec:
       containers:
       - name: zookeeper
-        image: confluentinc/cp-zookeeper:7.5.0
+        image: "{{ .Values.zookeeper.image.repository }}:{{ .Values.zookeeper.image.tag }}"
+        imagePullPolicy: {{ .Values.zookeeper.image.pullPolicy }}
         ports:
         - containerPort: 2181
         env:
         - name: ZOOKEEPER_CLIENT_PORT
-          value: "2181"
+          value: {{ .Values.zookeeper.clientPort | quote }}
         - name: ZOOKEEPER_TICK_TIME
-          value: "2000"
+          value: {{ .Values.zookeeper.tickTime | quote }}
 ---
 # Kafka Service
 apiVersion: v1
@@ -43,8 +44,8 @@ metadata:
   name: kafka-service
 spec:
   ports:
-  - port: 9092
-    targetPort: 9092
+  - port: {{ .Values.kafka.port }}
+    targetPort: {{ .Values.kafka.port }}
   selector:
     app: kafka
 ---
@@ -54,7 +55,7 @@ kind: Deployment
 metadata:
   name: kafka
 spec:
-  replicas: 1
+  replicas: {{ .Values.kafka.replicas }}
   selector:
     matchLabels:
       app: kafka
@@ -65,15 +66,16 @@ spec:
     spec:
       containers:
       - name: kafka
-        image: confluentinc/cp-kafka:7.5.0
+        image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag }}"
+        imagePullPolicy: {{ .Values.kafka.image.pullPolicy }}
         ports:
-        - containerPort: 9092
+        - containerPort: {{ .Values.kafka.port }}
         env:
         - name: KAFKA_BROKER_ID
-          value: "1"
+          value: {{ .Values.kafka.brokerId | quote }}
         - name: KAFKA_ZOOKEEPER_CONNECT
           value: "zookeeper:2181"
         - name: KAFKA_ADVERTISED_LISTENERS
-          value: "PLAINTEXT://kafka-service:9092"
+          value: "PLAINTEXT://kafka-service:{{ .Values.kafka.port }}"
         - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
-          value: "1"
+          value: {{ .Values.kafka.offsetsTopicReplicationFactor | quote }}

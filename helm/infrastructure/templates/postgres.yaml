@@ -7,7 +7,7 @@ data:
   init-schemas.sql: |
     -- Create Keycloak schema
     CREATE SCHEMA IF NOT EXISTS keycloak;
-    GRANT ALL PRIVILEGES ON SCHEMA keycloak TO planify;
+    GRANT ALL PRIVILEGES ON SCHEMA keycloak TO {{ .Values.postgres.username }};
 ---
 # ConfigMap for PostgreSQL
 apiVersion: v1
@@ -15,8 +15,8 @@ kind: ConfigMap
 metadata:
   name: postgres-config
 data:
-  POSTGRES_DB: planify
-  POSTGRES_USER: planify
+  POSTGRES_DB: {{ .Values.postgres.database }}
+  POSTGRES_USER: {{ .Values.postgres.username }}
 ---
 # Secret for PostgreSQL password
 apiVersion: v1
@@ -25,7 +25,7 @@ metadata:
   name: postgres-secret
 type: Opaque
 stringData:
-  POSTGRES_PASSWORD: planify123
+  POSTGRES_PASSWORD: {{ .Values.postgres.password | quote }}
 ---
 # PostgreSQL StatefulSet
 apiVersion: apps/v1
@@ -34,7 +34,7 @@ metadata:
   name: postgres
 spec:
   serviceName: postgres-service
-  replicas: 1
+  replicas: {{ .Values.postgres.replicas }}
   selector:
     matchLabels:
       app: postgres
@@ -49,9 +49,10 @@ spec:
             name: postgres-init-script
       containers:
         - name: postgres
-          image: postgres:16
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
           ports:
-            - containerPort: 5432
+            - containerPort: {{ .Values.postgres.port }}
               name: postgres
           envFrom:
             - configMapRef:
@@ -68,11 +69,11 @@ spec:
               mountPath: /docker-entrypoint-initdb.d
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: {{ .Values.postgres.resources.requests.memory | quote }}
+              cpu: {{ .Values.postgres.resources.requests.cpu | quote }}
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: {{ .Values.postgres.resources.limits.memory | quote }}
+              cpu: {{ .Values.postgres.resources.limits.cpu | quote }}
   volumeClaimTemplates:
     - metadata:
         name: postgres-storage
@@ -80,7 +81,7 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 5Gi
+            storage: {{ .Values.postgres.storage }}
 ---
 # PostgreSQL Service
 apiVersion: v1
@@ -91,6 +92,6 @@ spec:
   selector:
     app: postgres
   ports:
-    - port: 5432
-      targetPort: 5432
+    - port: {{ .Values.postgres.port }}
+      targetPort: {{ .Values.postgres.port }}
   clusterIP: None

@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-init-schema
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init-schemas
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              until pg_isready -h postgres-service -p {{ .Values.postgres.port }} -U {{ .Values.postgres.username }} > /dev/null 2>&1; do
+                sleep 2
+              done
+              psql -h postgres-service -U {{ .Values.postgres.username }} -d {{ .Values.postgres.database }} -q <<EOF
+              CREATE SCHEMA IF NOT EXISTS {{ .Values.keycloak.database.schema }};
+              GRANT ALL PRIVILEGES ON SCHEMA {{ .Values.keycloak.database.schema }} TO {{ .Values.postgres.username }};
+              EOF
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+  backoffLimit: 5

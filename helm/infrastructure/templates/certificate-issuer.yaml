@@ -1,0 +1,20 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: planify-selfsigned-cert
+spec:
+  secretName: planify-tls-cert
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+  dnsNames:
+  - planify.local
+  - "*.planify.local"
+  - localhost

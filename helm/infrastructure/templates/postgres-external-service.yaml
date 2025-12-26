@@ -1,0 +1,20 @@
+{{- if .Values.postgres.exposeExternal }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-external-service
+spec:
+  type: LoadBalancer
+  {{- if .Values.postgres.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+  {{- range .Values.postgres.loadBalancerSourceRanges }}
+    - {{ . }}
+  {{- end }}
+  {{- end }}
+  selector:
+    app: postgres
+  ports:
+    - port: {{ .Values.postgres.port }}
+      targetPort: {{ .Values.postgres.port }}
+      protocol: TCP
+{{- end }}

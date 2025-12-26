@@ -1,5 +1,6 @@
 postgres:
   exposeExternal: true
+  loadBalancerInternal: true
   loadBalancerSourceRanges:
     - "51.103.132.207/32"
     - "51.103.132.61/32"

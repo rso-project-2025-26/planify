@@ -12,6 +12,7 @@ spec:
   rules:
   - http:
       paths:
+      # Frontend
       - path: /
         pathType: Prefix
         backend:
@@ -19,6 +20,8 @@ spec:
             name: planify-frontend
             port:
               number: 80
+      
+      # Backend API Routes
       - path: /api/events
         pathType: Prefix
         backend:
@@ -26,6 +29,7 @@ spec:
             name: event-manager-service
             port:
               number: 8081
+      
       - path: /api/auth
         pathType: Prefix
         backend:
@@ -33,6 +37,7 @@ spec:
             name: user-service
             port:
               number: 8082
+      
       - path: /api/invitations
         pathType: Prefix
         backend:
@@ -40,6 +45,7 @@ spec:
             name: user-service
             port:
               number: 8082
+      
       - path: /api/organizations
         pathType: Prefix
         backend:
@@ -47,6 +53,7 @@ spec:
             name: user-service
             port:
               number: 8082
+      
       - path: /api/users
         pathType: Prefix
         backend:
@@ -54,3 +61,52 @@ spec:
             name: user-service
             port:
               number: 8082
+      
+      - path: /api/guests
+        pathType: Prefix
+        backend:
+          service:
+            name: guest-service
+            port:
+              number: 8085
+      
+      - path: /api/notifications
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+      
+      - path: /api/booking
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 8086
+      
+      - path: /api/locations
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 8086
+      
+      # Monitoring Routes
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+      
+      - path: /prometheus
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus
+            port:
+              number: 9090

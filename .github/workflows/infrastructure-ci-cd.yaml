@@ -2,7 +2,7 @@ name: Infrastructure - CI/CD
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, feature/prometheus-grafana]
     paths:
       - "k8s/**"
       - ".github/workflows/infrastructure-ci-cd.yaml"
@@ -37,7 +37,7 @@ jobs:
   deploy-infrastructure:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.ref == 'feature/prometheus-grafana'
     steps:
       - uses: actions/checkout@v4
       - run: |

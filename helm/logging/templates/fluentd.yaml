@@ -1,0 +1,159 @@
+---
+# Fluentd ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluentd
+  namespace: {{ .Release.Namespace }}
+---
+# ClusterRole for Fluentd
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fluentd
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+---
+# ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fluentd
+roleRef:
+  kind: ClusterRole
+  name: fluentd
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: fluentd
+  namespace: {{ .Release.Namespace }}
+---
+# Fluentd ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: {{ .Release.Namespace }}
+data:
+  fluent.conf: |
+    # Input: Collect logs from all containers
+    <source>
+      @type tail
+      @id in_tail_container_logs
+      path /var/log/containers/*.log
+      exclude_path ["/var/log/containers/fluentd-*.log", "/var/log/containers/*_planify-logging_*.log"]
+      pos_file /var/log/fluentd-containers.log.pos
+      tag kubernetes.*
+      read_from_head false
+      <parse>
+        @type regexp
+        expression /^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[^ ]*) (?<log>.*)$/
+        time_format %Y-%m-%dT%H:%M:%S.%N%:z
+      </parse>
+    </source>
+
+    # Filter: Add Kubernetes metadata
+    <filter kubernetes.**>
+      @type kubernetes_metadata
+      @id filter_kube_metadata
+      kubernetes_url "#{ENV['FLUENT_FILTER_KUBERNETES_URL'] || 'https://' + ENV.fetch('KUBERNETES_SERVICE_HOST') + ':' + ENV.fetch('KUBERNETES_SERVICE_PORT') + '/api'}"
+      verify_ssl "#{ENV['KUBERNETES_VERIFY_SSL'] || true}"
+      ca_file "#{ENV['KUBERNETES_CA_FILE']}"
+    </filter>
+
+    # Filter: Only keep logs from planify namespaces
+    <filter kubernetes.**>
+      @type grep
+      <regexp>
+        key $.kubernetes.namespace_name
+        pattern /^({{ join "|" .Values.fluentd.namespaces }})$/
+      </regexp>
+    </filter>
+
+    # Output: Send to Elasticsearch
+    <match kubernetes.**>
+      @type elasticsearch
+      @id out_es
+      @log_level info
+      include_tag_key true
+      host elasticsearch.{{ .Release.Namespace }}.svc.cluster.local
+      port 9200
+      logstash_format true
+      logstash_prefix planify
+      <buffer>
+        @type file
+        path {{ .Values.fluentd.buffer.path }}/kubernetes.system.buffer
+        flush_mode interval
+        retry_type exponential_backoff
+        flush_thread_count 2
+        flush_interval {{ .Values.fluentd.buffer.flush_interval }}
+        retry_forever
+        retry_max_interval 30
+        chunk_limit_size {{ .Values.fluentd.buffer.chunk_limit_size }}
+        queue_limit_length 8
+        overflow_action block
+      </buffer>
+    </match>
+---
+# Fluentd DaemonSet
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: fluentd
+spec:
+  selector:
+    matchLabels:
+      app: fluentd
+  template:
+    metadata:
+      labels:
+        app: fluentd
+    spec:
+      serviceAccountName: fluentd
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: fluentd
+        image: {{ .Values.fluentd.image.repository }}:{{ .Values.fluentd.image.tag }}
+        env:
+        - name: FLUENTD_SYSTEMD_CONF
+          value: disable
+        - name: FLUENT_CONTAINER_TAIL_EXCLUDE_PATH
+          value: /var/log/containers/fluent*
+        resources:
+          requests:
+            cpu: {{ .Values.fluentd.resources.requests.cpu }}
+            memory: {{ .Values.fluentd.resources.requests.memory }}
+          limits:
+            cpu: {{ .Values.fluentd.resources.limits.cpu }}
+            memory: {{ .Values.fluentd.resources.limits.memory }}
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: fluentd-config
+          mountPath: /fluentd/etc/fluent.conf
+          subPath: fluent.conf
+        - name: fluentd-buffers
+          mountPath: {{ .Values.fluentd.buffer.path }}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: fluentd-config
+        configMap:
+          name: fluentd-config
+      - name: fluentd-buffers
+        emptyDir: {}

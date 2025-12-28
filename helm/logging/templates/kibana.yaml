@@ -1,0 +1,74 @@
+---
+# Kibana Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kibana
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5601
+    targetPort: 5601
+    name: http
+  selector:
+    app: kibana
+---
+# Kibana Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kibana
+spec:
+  replicas: {{ .Values.kibana.replicas }}
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: {{ .Values.kibana.image.repository }}:{{ .Values.kibana.image.tag }}
+        ports:
+        - containerPort: 5601
+          name: http
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "http://elasticsearch.{{ .Release.Namespace }}.svc.cluster.local:9200"
+        - name: SERVER_NAME
+          value: "kibana"
+        - name: SERVER_HOST
+          value: "0.0.0.0"
+        - name: XPACK_SECURITY_ENABLED
+          value: "false"
+        - name: XPACK_MONITORING_ENABLED
+          value: "false"
+        resources:
+          requests:
+            memory: {{ .Values.kibana.resources.requests.memory | quote }}
+            cpu: {{ .Values.kibana.resources.requests.cpu | quote }}
+          limits:
+            memory: {{ .Values.kibana.resources.limits.memory | quote }}
+            cpu: {{ .Values.kibana.resources.limits.cpu | quote }}
+        readinessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /api/status
+            port: 5601
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5

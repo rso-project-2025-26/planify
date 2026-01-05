@@ -5,6 +5,12 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Enable CORS for Swagger UI if needed
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    # Increase body size for API testing via Swagger
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
 spec:
   ingressClassName: nginx
   # tls:
@@ -45,7 +51,21 @@ spec:
             name: event-manager-service
             port:
               number: 8081
-      
+      - path: /event-manager/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: event-manager-service
+            port:
+              number: 8081
+      - path: /event-manager/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: event-manager-service
+            port:
+              number: 8081
+
       - path: /api/auth
         pathType: Prefix
         backend:
@@ -77,7 +97,77 @@ spec:
             name: user-service
             port:
               number: 8082
-      
+      - path: /user-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8082
+      - path: /user-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8082
+      - path: /notification-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+      - path: /notification-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+      - path: /analytics-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: analytics-service
+            port:
+              number: 8084
+      - path: /analytics-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: analytics-service
+            port:
+              number: 8084
+      - path: /guest-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: guest-service
+            port:
+              number: 8085
+      - path: /guest-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: guest-service
+            port:
+              number: 8085
+      - path: /booking-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 8086
+      - path: /booking-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 8086
+
       - path: /api/guests
         pathType: Prefix
         backend:

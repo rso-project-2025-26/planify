@@ -28,6 +28,14 @@ spec:
             name: prometheus
             port:
               number: 9090
+
+      - path: /keycloak
+        pathType: Prefix
+        backend:
+          service:
+            name: keycloak-service
+            port:
+              number: 8080
       
       # Backend API Routes
       - path: /api/events
@@ -111,7 +119,7 @@ spec:
             port:
               number: 80
 
-  - host: analytics.4.182.10.195.nip.io
+  - host: analytics.131.189.20.56.nip.io
     http:
       paths:
       - path: /

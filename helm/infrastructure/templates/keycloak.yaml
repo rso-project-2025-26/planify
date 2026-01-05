@@ -13,6 +13,7 @@ metadata:
   name: keycloak-config
 data:
   KC_DB: {{ .Values.keycloak.database.type | quote }}
+  KC_HTTP_RELATIVE_PATH: "/keycloak"
   KC_DB_URL: "jdbc:postgresql://postgres-service:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}?currentSchema={{ .Values.keycloak.database.schema }}"
   KC_DB_USERNAME: {{ .Values.postgres.username | quote }}
   KC_DB_SCHEMA: {{ .Values.keycloak.database.schema | quote }}

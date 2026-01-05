@@ -8,6 +8,10 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   ingressClassName: nginx
+  tls:
+    - secretName: planify-tls-cert
+      hosts:
+        - {{ .Values.kibana.ingress.host }}
   rules:
   - host: {{ .Values.kibana.ingress.host }}
     http:

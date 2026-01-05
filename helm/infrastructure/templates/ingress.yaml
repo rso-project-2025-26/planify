@@ -7,10 +7,13 @@ metadata:
     # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   ingressClassName: nginx
-  # tls:
-  # - secretName: planify-tls-cert
+  tls:
+  - secretName: planify-tls-cert
+    hosts:
+      - 131.189.20.56.nip.io
   rules:
-  - http:
+  - host: 131.189.20.56.nip.io
+    http:
       paths:
       # Monitoring Routes
       - path: /grafana

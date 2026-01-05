@@ -49,6 +49,6 @@ kibana:
     enabled: true
     host: "kibana.131.189.20.56.nip.io"
     namespace: "{{ .Release.Namespace }}"
-    # tls:
-    #   enabled: true
-    #   secretName: kibana-tls
+    tls:
+      enabled: true
+      secretName: planify-tls-cert

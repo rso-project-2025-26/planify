@@ -713,11 +713,11 @@
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
         "http://localhost:4200/*",
-        "http://131.189.20.56.nip.io/*"
+        "http://131.189.20.56/*"
       ],
       "webOrigins": [
         "http://localhost:4200",
-        "http://131.189.20.56.nip.io"
+        "http://131.189.20.56"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -730,7 +730,7 @@
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
-        "post.logout.redirect.uris": "http://localhost:4200/*,http://131.189.20.56.nip.io/*",
+        "post.logout.redirect.uris": "http://localhost:4200/*,http://131.189.20.56/*",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false",
         "use.refresh.tokens": "true",

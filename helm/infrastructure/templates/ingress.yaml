@@ -5,8 +5,8 @@ metadata:
   namespace: planify-dev
   annotations:
     # Enable SSL redirect
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     # Enable CORS
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
@@ -19,11 +19,11 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
   ingressClassName: nginx
-  tls:
-  - secretName: planify-tls-cert
-    hosts:
-    - 131.189.20.56.nip.io
-    - analytics.131.189.20.56.nip.io
+  # tls:
+  # - secretName: planify-tls-cert
+  # hosts:
+  #   - 131.189.20.56.nip.io
+  #   - analytics.131.189.20.56.nip.io
   rules:
   - host: 131.189.20.56.nip.io
     http:

@@ -547,7 +547,7 @@ az aks create \
   --max-pods 30 \
   --enable-cluster-autoscaler \
   --min-count 1 \
-  --max-count 2 \
+  --max-count 3 \
   --tier free
 ```
 

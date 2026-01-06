@@ -80,6 +80,9 @@ keycloak:
     schema: keycloak
   hostnameStrict: "false"
   httpEnabled: "true"
+  hostname: "keycloak.131.189.20.56.nip.io"
+  httpRelativePath: ""
+  proxy: "edge"
 
 # Prometheus Configuration
 prometheus:

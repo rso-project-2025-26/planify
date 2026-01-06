@@ -25,8 +25,8 @@ spec:
   #   - 131.189.20.56.nip.io
   #   - analytics.131.189.20.56.nip.io
   rules:
-  - host: 131.189.20.56.nip.io
-    http:
+  # - host: 131.189.20.56.nip.io
+  - http:
       paths:
       # Monitoring Routes
       - path: /grafana

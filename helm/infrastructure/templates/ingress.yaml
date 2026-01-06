@@ -2,24 +2,31 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: planify-ingress
+  namespace: planify-dev
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    # Enable CORS for Swagger UI if needed
+    # Enable SSL redirect
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Enable CORS
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    # Increase body size for API testing via Swagger
+    # Increase body size
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    # WebSocket support
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
   ingressClassName: nginx
-  # tls:
-  # - secretName: planify-tls-cert
-    # hosts:
-    # - 131.189.20.56.nip.io
+  tls:
+  - secretName: planify-tls-cert
+    hosts:
+    - 131.189.20.56.nip.io
+    - analytics.131.189.20.56.nip.io
   rules:
-  # - host: 131.189.20.56.nip.io
-  - http:
+  - host: 131.189.20.56.nip.io
+    http:
       paths:
       # Monitoring Routes
       - path: /grafana
@@ -187,6 +194,14 @@ spec:
             port:
               number: 8083
       
+      - path: /ws
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+      
       - path: /api/booking
         pathType: Prefix
         backend:
@@ -203,7 +218,7 @@ spec:
             port:
               number: 8086
 
-      # Frontend
+      # Frontend (must be last)
       - path: /
         pathType: Prefix
         backend:

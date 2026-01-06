@@ -2,6 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: selfsigned-issuer
+  namespace: planify-dev
 spec:
   selfSigned: {}
 ---
@@ -9,6 +10,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: planify-selfsigned-cert
+  namespace: planify-dev
 spec:
   secretName: planify-tls-cert
   issuerRef:
@@ -17,3 +19,4 @@ spec:
   dnsNames:
   - 131.189.20.56.nip.io
   - "*.131.189.20.56.nip.io"
+  - analytics.131.189.20.56.nip.io

@@ -237,14 +237,3 @@ spec:
             name: analytics-service
             port:
               number: 8084
-
-  - host: keycloak.131.189.20.56.nip.io
-    http:
-      paths:
-        - path: /keycloak
-          pathType: Prefix
-          backend:
-            service:
-              name: keycloak-service
-              port:
-                number: 8080

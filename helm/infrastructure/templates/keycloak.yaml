@@ -14,7 +14,7 @@ metadata:
 data:
   KC_DB: {{ .Values.keycloak.database.type | quote }}
   KC_HTTP_RELATIVE_PATH: {{ .Values.keycloak.httpRelativePath | quote }}
-  KC_PROXY: {{ .Values.keycloak.proxy | quote }}
+  KC_PROXY_HEADERS: "xforwarded"
   KC_DB_URL: "jdbc:postgresql://postgres-service:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}?currentSchema={{ .Values.keycloak.database.schema }}"
   KC_DB_USERNAME: {{ .Values.postgres.username | quote }}
   KC_DB_SCHEMA: {{ .Values.keycloak.database.schema | quote }}
@@ -22,20 +22,20 @@ data:
   KC_HOSTNAME: {{ .Values.keycloak.hostname | quote }}
   KC_HTTP_ENABLED: {{ .Values.keycloak.httpEnabled | quote }}
   KC_HOSTNAME_STRICT_HTTPS: "false"
+  KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: keycloak-service
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: keycloak
   ports:
     - name: http
       port: {{ .Values.keycloak.port }}
       targetPort: {{ .Values.keycloak.port }}
-      nodePort: {{ .Values.keycloak.nodePort }}
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -712,12 +712,22 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
+        "https://4.185.235.181/",
+        "https://4.185.235.181",
+        "https://4.185.235.181.nip.io/*",
+        "http://4.185.235.181/",
+        "http://4.185.235.181",
+        "http://4.185.235.181.nip.io/*",
         "http://localhost:4200/*",
-        "http://131.189.20.56/*"
+        "https://4.185.235.181/*",
+        "http://4.185.235.181/*"
       ],
       "webOrigins": [
-        "http://localhost:4200",
-        "http://131.189.20.56"
+        "https://4.185.235.181",
+        "https://4.185.235.181.nip.io/*",
+        "http://4.185.235.181",
+        "http://4.185.235.181.nip.io/*",
+        "http://localhost:4200"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -730,7 +740,7 @@
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
-        "post.logout.redirect.uris": "http://localhost:4200/*,http://131.189.20.56/*",
+        "post.logout.redirect.uris": "http://localhost:4200/*##https://4.185.235.181.nip.io/*##https://4.185.235.181##https://4.185.235.181/##https://4.185.235.181/*",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false",
         "use.refresh.tokens": "true",
@@ -742,7 +752,7 @@
         "require.pushed.authorization.requests": "false",
         "tls.client.certificate.bound.access.tokens": "false",
         "display.on.consent.screen": "false",
-        "pkce.code.challenge.method": "",
+        "pkce.code.challenge.method": "S256",
         "token.response.type.bearer.lower-case": "false"
       },
       "authenticationFlowBindingOverrides": {},

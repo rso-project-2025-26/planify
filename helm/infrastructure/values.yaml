@@ -80,7 +80,7 @@ keycloak:
     schema: keycloak
   hostnameStrict: "false"
   httpEnabled: "true"
-  hostname: "131.189.20.56"
+  hostname: "4.185.235.181.nip.io"
   httpRelativePath: "/keycloak"
   proxy: "edge"
 

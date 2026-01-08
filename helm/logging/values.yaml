@@ -47,7 +47,7 @@ kibana:
       cpu: "1"
   ingress:
     enabled: true
-    host: "kibana.131.189.20.56.nip.io"
+    host: "kibana.4.185.235.181.nip.io"
     namespace: "{{ .Release.Namespace }}"
     # tls:
     #   enabled: true

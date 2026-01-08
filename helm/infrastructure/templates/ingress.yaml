@@ -17,17 +17,27 @@ metadata:
     # WebSocket support
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
 spec:
   ingressClassName: nginx
-  # tls:
-  # - secretName: planify-tls-cert
-  # hosts:
-  #   - 131.189.20.56.nip.io
-  #   - analytics.131.189.20.56.nip.io
+  tls:
+    - secretName: planify-tls-cert
+      hosts:
+        - 4.185.235.181.nip.io
   rules:
-  # - host: 131.189.20.56.nip.io
-  - http:
+  - host: 4.185.235.181.nip.io
+    http:
       paths:
+      # Keycloak - MUST be first with rewrite
+      - path: /keycloak
+        pathType: Prefix
+        backend:
+          service:
+            name: keycloak-service
+            port:
+              number: 8080
+
       # Monitoring Routes
       - path: /grafana
         pathType: Prefix
@@ -45,14 +55,6 @@ spec:
             port:
               number: 9090
 
-      - path: /keycloak
-        pathType: Prefix
-        backend:
-          service:
-            name: keycloak-service
-            port:
-              number: 8080
-      
       # Backend API Routes
       - path: /api/events
         pathType: Prefix
@@ -227,7 +229,7 @@ spec:
             port:
               number: 80
 
-  - host: analytics.131.189.20.56.nip.io
+  - host: analytics.4.185.235.181.nip.io
     http:
       paths:
       - path: /
@@ -237,14 +239,3 @@ spec:
             name: analytics-service
             port:
               number: 8084
-
-  - host: keycloak.131.189.20.56.nip.io
-    http:
-      paths:
-        - path: /keycloak
-          pathType: Prefix
-          backend:
-            service:
-              name: keycloak-service
-              port:
-                number: 8080

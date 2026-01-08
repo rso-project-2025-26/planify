@@ -17,6 +17,6 @@ spec:
     name: selfsigned-issuer
     kind: Issuer
   dnsNames:
-  - 131.189.20.56.nip.io
-  - "*.131.189.20.56.nip.io"
-  - analytics.131.189.20.56.nip.io
+  - 4.185.235.181.nip.io
+  - "*.4.185.235.181.nip.io"
+  - analytics.4.185.235.181.nip.io

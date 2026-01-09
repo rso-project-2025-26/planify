@@ -51,6 +51,7 @@ jobs:
           kubectl apply -f k8s/namespaces/namespaces.yaml
 
           helm upgrade --install logging ./helm/logging \
+            -f ./helm/infrastructure/values.yaml \
             --namespace planify-logging \
             --create-namespace \
             --timeout=5m

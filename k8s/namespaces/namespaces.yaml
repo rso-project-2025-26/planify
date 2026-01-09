@@ -1,0 +1,23 @@
+# Development namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: planify-dev
+  labels:
+    environment: development
+---
+# Production namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: planify-main
+  labels:
+    environment: production
+---
+# Logging namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: planify-logging
+  labels:
+    purpose: centralized-logging

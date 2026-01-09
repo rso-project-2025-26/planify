@@ -1,0 +1,54 @@
+elasticsearch:
+  replicas: 1
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: "8.11.0"
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  storage:
+    size: "5Gi"
+
+fluentd:
+  image:
+    repository: fluent/fluentd-kubernetes-daemonset
+    tag: "v1.16-debian-elasticsearch8-1"
+  resources:
+    requests:
+      cpu: "25m"
+      memory: "384Mi"
+    limits:
+      cpu: "300m"
+      memory: "768Mi"
+  namespaces:
+    - planify-dev
+    - planify-main
+  # Optional buffer config
+  buffer:
+    path: /var/log/fluentd-buffers
+    chunk_limit_size: 2M
+    flush_interval: 5s
+
+kibana:
+  replicas: 1
+  image:
+    repository: docker.elastic.co/kibana/kibana
+    tag: "8.11.0"
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
+  ingress:
+    enabled: true
+    host: "kibana.4.185.235.181.nip.io"
+    namespace: "{{ .Release.Namespace }}"
+    tls:
+      enabled: true
+      secretName: planify-tls-cert

@@ -1,0 +1,250 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: planify-ingress
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    - secretName: {{ .Values.ingress.tlsSecretName }}
+      hosts:
+        - {{ .Values.global.domain }}
+  rules:
+  - host: {{ .Values.global.domain }}
+    http:
+      paths:
+      # Keycloak - MUST be first with rewrite
+      - path: /keycloak
+        pathType: Prefix
+        backend:
+          service:
+            name: keycloak-service
+            port:
+              number: 8080
+
+      # Monitoring Routes
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+      
+      - path: /prometheus
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus
+            port:
+              number: 9090
+
+      - path: /api/reminders
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+
+      # Backend API Routes
+      - path: /api/events
+        pathType: Prefix
+        backend:
+          service:
+            name: event-manager-service
+            port:
+              number: 8081
+
+      - path: /event-manager/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: event-manager-service
+            port:
+              number: 8081
+
+      - path: /event-manager/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: event-manager-service
+            port:
+              number: 8081
+
+      - path: /api/auth
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8082
+      
+      - path: /api/invitations
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8082
+      
+      - path: /api/organizations
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8082
+      
+      - path: /api/users
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8082
+
+      - path: /user-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8082
+
+      - path: /user-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: user-service
+            port:
+              number: 8082
+
+      - path: /notification-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+
+      - path: /notification-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+
+      - path: /analytics-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: analytics-service
+            port:
+              number: 8084
+
+      - path: /analytics-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: analytics-service
+            port:
+              number: 8084
+
+      - path: /guest-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: guest-service
+            port:
+              number: 8085
+
+      - path: /guest-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: guest-service
+            port:
+              number: 8085
+
+      - path: /booking-service/swagger-ui/index.html
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 8086
+
+      - path: /booking-service/v3/api-docs
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 8086
+
+      - path: /api/guests
+        pathType: Prefix
+        backend:
+          service:
+            name: guest-service
+            port:
+              number: 8085
+      
+      - path: /api/notifications
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+      
+      - path: /ws
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+      
+      - path: /api/booking
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 8086
+      
+      - path: /api/locations
+        pathType: Prefix
+        backend:
+          service:
+            name: booking-service
+            port:
+              number: 8086
+
+      # Frontend (must be last)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: planify-frontend
+            port:
+              number: 80
+
+  - host: analytics.{{ .Values.global.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: analytics-service
+            port:
+              number: 8084
+{{- end }}

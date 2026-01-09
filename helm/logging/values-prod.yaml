@@ -1,0 +1,3 @@
+kibana:
+  ingress:
+    host: "kibana.131.189.78.13.nip.io"

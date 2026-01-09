@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:16
@@ -59,24 +57,30 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/planify_keycloak
+      KC_DB_URL: jdbc:postgresql://postgres:5432/planify?currentSchema=keycloak
       KC_DB_USERNAME: planify
       KC_DB_PASSWORD: planify
+      KC_DB_SCHEMA: keycloak
       KC_HOSTNAME: localhost
       KC_HOSTNAME_PORT: 9080
       KC_HTTP_ENABLED: "true"
       KC_PROXY: edge
-    command: start-dev
+    command: 
+      - start-dev
+      - --import-realm
     ports:
       - "9080:8080"
+    volumes:
+      - ./realm-config.json:/opt/keycloak/data/import/realm-config.json:ro
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 90s
     networks:
       - planify-net
 

@@ -78,7 +78,7 @@ prometheus:
       cpu: "100m"
     limits:
       memory: "512Mi"
-      cpu: "250m"
+      cpu: "200m"
 
 # Grafana Configuration
 grafana:
@@ -97,7 +97,7 @@ grafana:
       cpu: "50m"
     limits:
       memory: "256Mi"
-      cpu: "200m"
+      cpu: "150m"
 
 # Ingress Configuration
 ingress:

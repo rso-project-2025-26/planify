@@ -2,18 +2,6 @@
 global:
   domain: "131.189.78.13.nip.io"
 
-# Disable external postgres
-postgres:
-  exposeExternal: false
-  replicas: 1
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "500m"
-    limits:
-      memory: "1Gi"
-      cpu: "1000m"
-
 # Keycloak configuration
 keycloak:
   hostname: "131.189.78.13.nip.io"

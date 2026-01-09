@@ -19,7 +19,7 @@ data:
   KC_DB_USERNAME: {{ .Values.postgres.username | quote }}
   KC_DB_SCHEMA: {{ .Values.keycloak.database.schema | quote }}
   KC_HOSTNAME_STRICT: {{ .Values.keycloak.hostnameStrict | quote }}
-  KC_HOSTNAME: {{ .Values.keycloak.hostname | quote }}
+  KC_HOSTNAME: {{ .Values.keycloak.hostname | default .Values.global.domain | quote }}
   KC_HTTP_ENABLED: {{ .Values.keycloak.httpEnabled | quote }}
   KC_HOSTNAME_STRICT_HTTPS: "false"
   KC_HOSTNAME_STRICT_BACKCHANNEL: "false"

@@ -1,0 +1,7 @@
+# Development Environment Configuration
+global:
+  domain: "4.185.235.181.nip.io"
+
+# Keycloak hostname for dev
+keycloak:
+  hostname: "4.185.235.181.nip.io"

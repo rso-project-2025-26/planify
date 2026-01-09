@@ -47,6 +47,7 @@ data:
           - targets: ['booking-service:8086']
 ---
 # Prometheus Deployment
+{{- if .Values.prometheus.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -111,3 +112,4 @@ spec:
     name: web
   selector:
     app: prometheus
+{{- end }}

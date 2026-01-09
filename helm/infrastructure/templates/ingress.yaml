@@ -55,6 +55,14 @@ spec:
             port:
               number: 9090
 
+      - path: /api/reminders
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 8083
+
       # Backend API Routes
       - path: /api/events
         pathType: Prefix

@@ -1,3 +1,0 @@
-kibana:
-  ingress:
-    host: "kibana.4.185.235.181.nip.io"

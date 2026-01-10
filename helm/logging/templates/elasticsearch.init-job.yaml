@@ -1,0 +1,158 @@
+---
+# Elasticsearch Initialization Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: elasticsearch-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: elasticsearch-init
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        app: elasticsearch-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: elasticsearch-init
+        image: curlimages/curl:8.5.0
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          echo "Waiting for Elasticsearch to be ready..."
+          
+          # Wait for Elasticsearch to be available (max 5 minutes)
+          for i in $(seq 1 60); do
+            if curl -s "http://elasticsearch.{{ .Release.Namespace }}.svc.cluster.local:9200/_cluster/health" > /dev/null 2>&1; then
+              echo "Elasticsearch is ready!"
+              break
+            fi
+            echo "Waiting for Elasticsearch... attempt $i/60"
+            sleep 5
+          done
+          
+          # Create index template
+          echo "Creating index template for planify-*..."
+          curl -X PUT "http://elasticsearch.{{ .Release.Namespace }}.svc.cluster.local:9200/_index_template/planify-template" \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "index_patterns": ["planify-*"],
+              "priority": 500,
+              "template": {
+                "settings": {
+                  "number_of_shards": 1,
+                  "number_of_replicas": 0,
+                  "index.mapping.total_fields.limit": 2000
+                },
+                "mappings": {
+                  "properties": {
+                    "@timestamp": {
+                      "type": "date"
+                    },
+                    "log": {
+                      "type": "text",
+                      "fields": {
+                        "keyword": {
+                          "type": "keyword",
+                          "ignore_above": 32766
+                        }
+                      }
+                    },
+                    "stream": {
+                      "type": "keyword"
+                    },
+                    "logtag": {
+                      "type": "keyword"
+                    },
+                    "docker": {
+                      "properties": {
+                        "container_id": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "kubernetes": {
+                      "properties": {
+                        "pod_name": {
+                          "type": "keyword"
+                        },
+                        "namespace_name": {
+                          "type": "keyword"
+                        },
+                        "container_name": {
+                          "type": "keyword"
+                        },
+                        "container_image": {
+                          "type": "text",
+                          "fields": {
+                            "keyword": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "labels": {
+                          "properties": {
+                            "app": {
+                              "type": "text",
+                              "fields": {
+                                "keyword": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "namespace_labels": {
+                          "properties": {
+                            "environment": {
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "dynamic_templates": [
+                    {
+                      "kubernetes_labels": {
+                        "path_match": "kubernetes.labels.*",
+                        "mapping": {
+                          "type": "text",
+                          "fields": {
+                            "keyword": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "dynamic": true
+                }
+              }
+            }'
+          
+          echo ""
+          echo "Index template created successfully!"
+          
+          # Verify the template was created
+          echo "Verifying template..."
+          curl -s "http://elasticsearch.{{ .Release.Namespace }}.svc.cluster.local:9200/_index_template/planify-template" | grep -q "planify-template"
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ Template verification successful!"
+          else
+            echo "❌ Template verification failed!"
+            exit 1
+          fi

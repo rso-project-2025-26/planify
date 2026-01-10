@@ -40,14 +40,14 @@ kibana:
     tag: "8.11.0"
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "50m"
-    limits:
       memory: "512Mi"
-      cpu: "200m"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
   ingress:
     enabled: true
-    host: "kibana.4.185.235.181.nip.io"
+    host: "kibana.131.189.78.13.nip.io"
     namespace: "{{ .Release.Namespace }}"
     tls:
       enabled: true

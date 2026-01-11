@@ -635,7 +635,7 @@ az aks delete \
 
 Access Prometheus:
 - Local: http://localhost:9090
-- K8s: http://[INGRESS-IP]/prometheus
+- K8s: http://[INGRESS-IP].nip.io/prometheus
 
 Key Metrics:
 - http_server_requests_seconds - HTTP request latencies
@@ -648,9 +648,6 @@ Query Examples:
 # Request rate per service
 rate(http_server_requests_seconds_count[5m])
 
-# 95th percentile latency
-histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m]))
-
 # JVM heap usage
 jvm_memory_used_bytes{area="heap"}
 ```
@@ -659,7 +656,7 @@ jvm_memory_used_bytes{area="heap"}
 
 Access Grafana:
 - Local: http://localhost:3000
-- K8s: http://[INGRESS-IP]/grafana
+- K8s: http://[INGRESS-IP].nip.io/grafana
 - Default credentials: admin / admin
 
 Available Dashboards:
@@ -672,7 +669,7 @@ Available Dashboards:
 ### ELK Stack Logging
 
 Access Kibana:
-- K8s: http://[INGRESS-IP]/kibana
+- K8s: http://kibana.[INGRESS-IP].nip.io/
 
 Log Collection:
 - Fluentd agents run on each node
